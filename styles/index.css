@@ -1,0 +1,17 @@
+
+#fluid-canvas{
+    width: 100vw;
+    height: 100vh;
+    z-index: -9999;
+    pointer-events: auto;
+}
+
+#body-content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: transparent;
+    pointer-events: none;
+}
