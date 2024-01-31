@@ -3,6 +3,12 @@ html, body {
   height: 100%;
 }
 
+.flex-col-48 {
+  flex-direction: column;
+  gap: 48px;
+  display: flex;
+}
+
 .flex-col-16 {
   flex-direction: column;
   gap: 16px;
