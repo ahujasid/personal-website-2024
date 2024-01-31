@@ -1,0 +1,18 @@
+#fluid-canvas {
+  z-index: -9999;
+  pointer-events: auto;
+  width: 100vw;
+  height: 100vh;
+}
+
+#body-content {
+  pointer-events: none;
+  background-color: #0000;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/*# sourceMappingURL=index.78b2a846.css.map */

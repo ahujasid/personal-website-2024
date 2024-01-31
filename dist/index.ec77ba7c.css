@@ -1,0 +1,53 @@
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+.flex-col-16 {
+  flex-direction: column;
+  gap: 16px;
+  display: flex;
+}
+
+.flex-col-justified {
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  display: flex;
+}
+
+.flex-row-justified {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 16px;
+  display: flex;
+}
+
+.flex-row-24 {
+  flex-direction: row;
+  gap: 24px;
+  display: flex;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.w50 {
+  width: 50%;
+}
+
+.w36 {
+  width: 36%;
+}
+
+.content-container {
+  color: #fff;
+  padding: 48px;
+}
+
+a {
+  pointer-events: auto;
+}
+
+/*# sourceMappingURL=index.ec77ba7c.css.map */
