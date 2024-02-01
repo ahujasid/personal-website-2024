@@ -594,8 +594,10 @@ var currentRotation = 0; // Current rotation, to be eased
 var lastScrollPos = 0; // Last scroll position
 var targetMouse = new _three.Vector2(-10, -10);
 function init() {
-    camera = new _three.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
-    camera.position.z = 1;
+    // camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10);
+    camera = new _three.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 1000);
+    camera.position.z = 1; // Adjust as necessary
+    // camera.position.z = 1;
     scene = new _three.Scene();
     renderer = new _three.WebGLRenderer({
         antialias: true
@@ -620,50 +622,55 @@ function init() {
 }
 function createMeshForImage(img, texture) {
     let bounds = img.getBoundingClientRect();
-    let aspect = window.innerWidth / window.innerHeight;
-    let width = bounds.width / window.innerWidth * aspect;
-    let height = bounds.height / window.innerHeight * aspect;
-    let geometry = new _three.PlaneGeometry(width, height);
+    // Use the actual pixel dimensions for the geometry
+    let geometry = new _three.PlaneGeometry(bounds.width, bounds.height);
     let material = new _three.MeshBasicMaterial({
         map: texture
     });
     let mesh = new _three.Mesh(geometry, material);
-    mesh.userData.bounds = img.getBoundingClientRect();
-    let x = (bounds.left + bounds.width / 2 - window.innerWidth / 2) / window.innerWidth * aspect;
-    let y = -(bounds.top + bounds.height / 2 - window.innerHeight / 2) / window.innerHeight * aspect;
+    // Calculate position in the coordinate system of the orthographic camera
+    let x = bounds.left - window.innerWidth / 2 + bounds.width / 2;
+    let y = -bounds.top + window.innerHeight / 2 - bounds.height / 2;
     mesh.position.set(x, y, 0);
+    mesh.userData.bounds = bounds;
     return mesh;
 }
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    // Update camera for the new window size
+    camera.left = window.innerWidth / -2;
+    camera.right = window.innerWidth / 2;
+    camera.top = window.innerHeight / 2;
+    camera.bottom = window.innerHeight / -2;
     camera.updateProjectionMatrix();
+    // Update renderer and composer sizes
     renderer.setSize(window.innerWidth, window.innerHeight);
     composer.setSize(window.innerWidth, window.innerHeight);
-    let aspect = window.innerWidth / window.innerHeight;
+    // Update meshes
     imageMeshes.forEach((mesh, index)=>{
         let img = images[index];
         let bounds = img.getBoundingClientRect();
-        let width = bounds.width / window.innerWidth * aspect;
-        let height = bounds.height / window.innerHeight * aspect;
+        // Update geometry to match new size
         mesh.geometry.dispose();
-        mesh.geometry = new _three.PlaneGeometry(width, height);
-        let x = (bounds.left + bounds.width / 2 - window.innerWidth / 2) / window.innerWidth * aspect;
-        let y = -(bounds.top + bounds.height / 2 - window.innerHeight / 2) / window.innerHeight * aspect;
+        mesh.geometry = new _three.PlaneGeometry(bounds.width, bounds.height);
+        // Update position
+        let x = bounds.left - window.innerWidth / 2 + bounds.width / 2;
+        let y = -bounds.top + window.innerHeight / 2 - bounds.height / 2;
         mesh.position.set(x, y, 0);
     });
+    // Update image positions in case of scrolling
     updateImagePositions();
 }
 function updateImagePositions() {
-    let aspect = window.innerWidth / window.innerHeight;
     imageMeshes.forEach((mesh)=>{
         let bounds = mesh.userData.bounds;
-        let width = bounds.width / window.innerWidth * aspect;
-        let height = bounds.height / window.innerHeight * aspect;
-        mesh.geometry.dispose();
-        mesh.geometry = new _three.PlaneGeometry(width, height);
-        let x = (bounds.left + bounds.width / 2 - window.innerWidth / 2) / window.innerWidth * aspect;
-        let y = (bounds.top + bounds.height / 2 - window.innerHeight / 2 + scrollPos) / window.innerHeight * aspect;
+        // Calculate position in the coordinate system of the orthographic camera
+        let x = bounds.left - window.innerWidth / 2 + bounds.width / 2;
+        let y = -bounds.top + window.innerHeight / 2 - bounds.height / 2;
+        // Adjust for scrolling
+        y += scrollPos; // Subtract because we're moving in the opposite direction of scrolling
+        // Update mesh position
         mesh.position.set(x, y, 0);
+        console.log("Updated position - x:", x, " y:", y);
         // Apply rotation for 3D effect
         mesh.rotation.z = -currentRotation * 1.5; // Adjust direction and amount of rotation here
     });
@@ -721,6 +728,23 @@ document.addEventListener("mousemove", (e)=>{
     targetMouse.x = e.clientX / window.innerWidth;
     targetMouse.y = 1. - e.clientY / window.innerHeight;
 });
+function scissorTest() {
+    renderer.setScissorTest(true);
+    imageMeshes.forEach((mesh)=>{
+        let bounds = mesh.userData.bounds;
+        const canvasBounds = renderer.domElement.getBoundingClientRect();
+        const left = bounds.left - canvasBounds.left;
+        let bottom = canvasBounds.bottom - bounds.bottom - bounds.height;
+        bottom = Math.max(0, bottom);
+        const width = bounds.width;
+        const height = bounds.height;
+        renderer.setScissor(left, bottom, width, height);
+        renderer.setViewport(left, bottom, width, height);
+        renderer.render(scene, camera);
+        console.log("left: ", left, "bottom: ", bottom, "width: ", width, "height: ", height);
+    });
+    renderer.setScissorTest(false);
+}
 function animate() {
     requestAnimationFrame(animate);
     // Update the scroll position
@@ -737,6 +761,8 @@ function animate() {
     uMouse.x += (targetMouse.x - uMouse.x) * 0.05;
     uMouse.y += (targetMouse.y - uMouse.y) * 0.05;
     customPass.uniforms.uMouse.value = uMouse;
+    //Scissor test
+    // scissorTest();
     // Update image positions
     updateImagePositions();
     composer.render();
