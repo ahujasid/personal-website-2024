@@ -1,1 +1,0 @@
-{"mappings":"AAAA;;;;;AAKA","sources":["styles/about.css"],"sourcesContent":["body{\n    background-color: black;\n    color: white;\n}\n\ncanvas{\n    position: absolute;\n    top: 0;\n    left: 0;\n    height: 100%;\n    width: 100%;\n}"],"names":[],"version":3,"file":"about.87e01df2.css.map","sourceRoot":"/__parcel_source_root/"}

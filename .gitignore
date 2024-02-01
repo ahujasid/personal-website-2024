@@ -1,0 +1,8 @@
+#Ignore Parcel Cache
+.parcel-cache
+
+#Ignore Node Modules
+node_modules
+
+#Ignore dist
+dist
